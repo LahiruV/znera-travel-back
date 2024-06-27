@@ -75,12 +75,12 @@ router.post('/login', async (req, res) => {
 });
 
 router.post('/mailSend', async (req, res) => {
-  const { email} = req.body;
+  const {email} = req.body;
   console.log(email,"äsds");
   try {
     let user = await User.findOne({ email });
-    if (!user) {
-      return res.status(400).json({ msg: 'Invalid credentials' });
+    if (user) {
+      return res.status(400).json({ msg: 'User already exists change Email'});
     }
     res.json({ msg: 'Email is valid' });
   } catch (err) {
