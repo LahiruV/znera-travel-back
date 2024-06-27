@@ -8,7 +8,7 @@ const auth = require('../middleware/auth');
 
 // Configure your email transport
 const transporter = nodemailer.createTransport({
-  service: 'gmail', // e.g., 'gmail'
+  service: 'service_989we1x', // e.g., 'gmail'
   auth: {
     user: 'intlahiruvimukthi@gmail.com',
     pass: 'Dula0778923789'
