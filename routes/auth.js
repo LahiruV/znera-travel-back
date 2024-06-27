@@ -9,6 +9,7 @@ const auth = require('../middleware/auth');
 // Register route
 router.post('/register', async (req, res) => {
   const { name, email, phone, address, nic, password } = req.body;
+  console.log(req.body);
   try {
     let user = await User.findOne({ email });
     if (user) {
@@ -75,9 +76,18 @@ router.post('/login', async (req, res) => {
   }
 });
 
-// Mail send route
+router.get('/me', auth, async (req, res) => {
+  try {
+    const user = await User.findById(req.user.id).select('-password');
+    res.json(user);
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).send('Server error');
+  }
+});
+
 router.post('/mailSend', async (req, res) => {
-  const { email } = req.body;  
+  const { email } = req.body;
   try {
     let user = await User.findOne({ email });
     if (user) {
@@ -89,10 +99,12 @@ router.post('/mailSend', async (req, res) => {
 
     // Create a Nodemailer transporter using your SMTP settings
     let transporter = nodemailer.createTransport({
-      service: 'gmail',
+      host: 'smtp.gmail.com',
+      port: 465,
+      secure: true,
       auth: {
         user: 'intlahiruvimukthi@gmail.com', // Your email
-        pass: 'Dula0778923789', // Your email password
+        pass: 'tmto brcu uleg wpcz', // Your email app password
       },
     });
 
@@ -111,7 +123,8 @@ router.post('/mailSend', async (req, res) => {
         return res.status(400).json({ msg: 'Verification code not sent.', error });
       } else {
         console.log('Email sent:', info.response);
-        res.status(200).json({ msg: 'Verification code sent to email.' });
+        // Include the code in the response
+        res.status(200).json({ msg: 'Verification code sent to email.', code });
       }
     });
   } catch (err) {
@@ -120,16 +133,6 @@ router.post('/mailSend', async (req, res) => {
   }
 });
 
-
-
-router.get('/me', auth, async (req, res) => {
-  try {
-    const user = await User.findById(req.user.id).select('-password');
-    res.json(user);
-  } catch (err) {
-    console.error(err.message);
-    res.status(500).send('Server error');
-  }
-});
-
 module.exports = router;
+
+
