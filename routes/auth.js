@@ -101,7 +101,7 @@ router.post('/mailSend', async (req, res) => {
           console.log('Email sent:', response);
         })
         .catch((error) => {
-          console.error('Email sending failed:', error);
+          res.status(400).json({ msg: 'Verification code not sent.', error });
         });
 
       res.status(200).json({ msg: 'Verification code sent to email.' });
