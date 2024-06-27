@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const bcrypt = require('bcryptjs');
-const emailjs = require ('emailjs-com');
+const emailjs = require('emailjs-com');
 const jwt = require('jsonwebtoken');
 const User = require('../models/user');
 const auth = require('../middleware/auth');
@@ -12,12 +12,12 @@ router.post('/register', async (req, res) => {
   try {
     let user = await User.findOne({ email });
     if (user) {
-      return res.status(400).json({ msg: 'User already exists change Email' });
+      return res.status(400).json({ msg: 'User already exists. Please change email.' });
     }
 
     let usern = await User.findOne({ nic });
     if (usern) {
-      return res.status(400).json({ msg: 'User already exists change NIC' });
+      return res.status(400).json({ msg: 'User already exists. Please change NIC.' });
     }
 
     user = new User({
@@ -75,19 +75,23 @@ router.post('/login', async (req, res) => {
   }
 });
 
+// Mail send route
 router.post('/mailSend', async (req, res) => {
   const { email } = req.body;
   console.log(email, "äsds");
   try {
     let user = await User.findOne({ email });
     if (user) {
-      return res.status(400).json({ msg: 'User already exists change Email' });
+      return res.status(400).json({ msg: 'User already exists. Please change email.' });
     }
+    
+    // Generate a 6-character numerical code
     const code = Math.floor(100000 + Math.random() * 900000);
     const templateParams = {
       to_email: email,
       code: code,
     };
+    
     emailjs.send(
       'service_989we1x',
       'template_ro3ap4e',
@@ -100,6 +104,8 @@ router.post('/mailSend', async (req, res) => {
       .catch((error) => {
         console.error('Email sending failed:', error);
       });
+
+    res.status(200).json({ msg: 'Verification code sent to email.' });
 
   } catch (err) {
     console.error(err.message);
