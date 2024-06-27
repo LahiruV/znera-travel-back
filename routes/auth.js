@@ -107,7 +107,7 @@ router.post('/mailSend', async (req, res) => {
         });
 
       res.status(200).json({ msg: 'Verification code sent to email.' });
-    }, 3000); // 3000 milliseconds = 3 seconds
+    }, 8000); // 3000 milliseconds = 3 seconds
 
   } catch (err) {
     console.error(err.message);
