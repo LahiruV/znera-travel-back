@@ -79,10 +79,10 @@ router.post('/login', async (req, res) => {
 router.post('/mailSend', async (req, res) => {
   const { email } = req.body;  
   try {
-    // let user = await User.findOne({ email });
-    // if (user) {
-    //   return res.status(400).json({ msg: 'User already exists. Please change email.' });
-    // }
+    let user = await User.findOne({ email });
+    if (user) {
+      return res.status(400).json({ msg: 'User already exists. Please change email.' });
+    }
 
     // Generate a 6-character numerical code
     const code = Math.floor(100000 + Math.random() * 900000);
