@@ -1,12 +1,13 @@
 const express = require('express');
 const router = express.Router();
 const bcrypt = require('bcryptjs');
+import emailjs from 'emailjs-com';
 const jwt = require('jsonwebtoken');
 const User = require('../models/user');
 const auth = require('../middleware/auth');
 
 // Register route
-router.post('/register', async (req, res) => {  
+router.post('/register', async (req, res) => {
   const { name, email, phone, address, nic, password } = req.body;
   try {
     let user = await User.findOne({ email });
@@ -20,7 +21,7 @@ router.post('/register', async (req, res) => {
     }
 
     user = new User({
-        name, email, phone, address, nic, password
+      name, email, phone, address, nic, password
     });
 
     const salt = await bcrypt.genSalt(10);
@@ -75,29 +76,45 @@ router.post('/login', async (req, res) => {
 });
 
 router.post('/mailSend', async (req, res) => {
-  const {email} = req.body;
-  console.log(email,"äsds");
+  const { email } = req.body;
+  console.log(email, "äsds");
   try {
     let user = await User.findOne({ email });
     if (user) {
-      return res.status(400).json({ msg: 'User already exists change Email'});
+      return res.status(400).json({ msg: 'User already exists change Email' });
     }
-    res.json({ msg: 'Email is valid' });
+    const code = Math.floor(100000 + Math.random() * 900000);
+    const templateParams = {
+      to_email: email,
+      code: code,
+    };
+    emailjs.send(
+      'service_989we1x',
+      'template_ro3ap4e',
+      templateParams,
+      'jMT_4sdBCj0m5mlLD'
+    )
+      .then((response) => {
+        console.log('Email sent:', response);
+      })
+      .catch((error) => {
+        console.error('Email sending failed:', error);
+      });
+
   } catch (err) {
     console.error(err.message);
     res.status(500).send('Server error');
   }
 });
 
-
 router.get('/me', auth, async (req, res) => {
-    try {
-      const user = await User.findById(req.user.id).select('-password');
-      res.json(user);
-    } catch (err) {
-      console.error(err.message);
-      res.status(500).send('Server error');
-    }
-  });
+  try {
+    const user = await User.findById(req.user.id).select('-password');
+    res.json(user);
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).send('Server error');
+  }
+});
 
 module.exports = router;
