@@ -77,8 +77,7 @@ router.post('/login', async (req, res) => {
 
 // Mail send route
 router.post('/mailSend', async (req, res) => {
-  const { email } = req.body;
-  console.log(email, "äsds");
+  const { email } = req.body;  
   try {
     let user = await User.findOne({ email });
     if (user) {
@@ -92,26 +91,30 @@ router.post('/mailSend', async (req, res) => {
       code: code,
     };
     
-    emailjs.send(
-      'service_989we1x',
-      'template_ro3ap4e',
-      templateParams,
-      'jMT_4sdBCj0m5mlLD'
-    )
-      .then((response) => {
-        console.log('Email sent:', response);
-      })
-      .catch((error) => {
-        console.error('Email sending failed:', error);
-      });
+    // Introduce a 3-second delay before sending the email
+    setTimeout(() => {
+      emailjs.send(
+        'service_989we1x',
+        'template_ro3ap4e',
+        templateParams,
+        'jMT_4sdBCj0m5mlLD'
+      )
+        .then((response) => {
+          console.log('Email sent:', response);
+        })
+        .catch((error) => {
+          console.error('Email sending failed:', error);
+        });
 
-    res.status(200).json({ msg: 'Verification code sent to email.' });
+      res.status(200).json({ msg: 'Verification code sent to email.' });
+    }, 3000); // 3000 milliseconds = 3 seconds
 
   } catch (err) {
     console.error(err.message);
     res.status(500).send('Server error');
   }
 });
+
 
 router.get('/me', auth, async (req, res) => {
   try {
