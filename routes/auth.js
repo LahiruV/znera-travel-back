@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const bcrypt = require('bcryptjs');
-import emailjs from 'emailjs-com';
+const emailjs = require ('emailjs-com');
 const jwt = require('jsonwebtoken');
 const User = require('../models/user');
 const auth = require('../middleware/auth');
