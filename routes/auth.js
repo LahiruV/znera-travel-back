@@ -76,6 +76,7 @@ router.post('/login', async (req, res) => {
 
 router.post('/mailSend', async (req, res) => {
   const { email} = req.body;
+  console.log(email,"äsds");
   try {
     let user = await User.findOne({ email });
     if (!user) {
