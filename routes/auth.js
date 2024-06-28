@@ -103,14 +103,14 @@ router.post('/mailSend', async (req, res) => {
       port: 465,
       secure: true,
       auth: {
-        user: 'intlahiruvimukthi@gmail.com', // Your email
-        pass: 'tmto brcu uleg wpcz', // Your email app password
+        user: 'anjulagehan23@gmail.com', // Your email
+        pass: 'pplu cpkl nqlt rtwi', // Your email app password
       },
     });
 
     // Set up email data
     let mailOptions = {
-      from: 'intlahiruvimukthi@gmail.com',
+      from: 'anjulagehan23@gmail.com',
       to: email,
       subject: 'Verification Code',
       text: `Your verification code is: ${code}`,
