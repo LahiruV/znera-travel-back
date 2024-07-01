@@ -8,8 +8,7 @@ const auth = require('../middleware/auth');
 
 // Register route
 router.post('/register', async (req, res) => {
-  const { name, email, phone, address, nic, password } = req.body;
-  console.log(req.body);
+  const { name, email, phone, address, nic, password } = req.body;  
   try {
     let user = await User.findOne({ email });
     if (user) {
@@ -121,12 +120,21 @@ router.post('/mailSend', async (req, res) => {
       if (error) {
         console.error('Email sending error:', error);
         return res.status(400).json({ msg: 'Verification code not sent.', error });
-      } else {
-        console.log('Email sent:', info.response);
+      } else {        
         // Include the code in the response
         res.status(200).json({ msg: 'Verification code sent to email.', code });
       }
     });
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).send('Server error');
+  }
+});
+
+router.get('/users', auth, async (req, res) => {
+  try {
+    const users = await User.find().select('-password'); // Exclude password field
+    res.json(users);
   } catch (err) {
     console.error(err.message);
     res.status(500).send('Server error');
