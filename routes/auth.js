@@ -8,7 +8,7 @@ const auth = require('../middleware/auth');
 
 // Register route
 router.post('/register', async (req, res) => {
-  const { name, email, phone, address, nic, password } = req.body;  
+  const { name, email, phone, address, nic, password } = req.body;
   try {
     let user = await User.findOne({ email });
     if (user) {
@@ -120,7 +120,7 @@ router.post('/mailSend', async (req, res) => {
       if (error) {
         console.error('Email sending error:', error);
         return res.status(400).json({ msg: 'Verification code not sent.', error });
-      } else {        
+      } else {
         // Include the code in the response
         res.status(200).json({ msg: 'Verification code sent to email.', code });
       }
@@ -135,6 +135,56 @@ router.get('/users', auth, async (req, res) => {
   try {
     const users = await User.find().select('-password'); // Exclude password field
     res.json(users);
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).send('Server error');
+  }
+});
+
+router.put('/update', auth, async (req, res) => {
+  const { name, email, phone, address, nic, password, profile } = req.body;
+
+  try {
+    // Find the user by ID
+    let user = await User.find(email);
+
+    if (!user) {
+      return res.status(404).json({ msg: 'User not found' });
+    }
+
+    // Check if email or nic is being updated and is unique
+    if (email && email !== user.email) {
+      let userEmail = await User.findOne({ email });
+      if (userEmail) {
+        return res.status(400).json({ msg: 'Email already exists' });
+      }
+    }
+
+    if (nic && nic !== user.nic) {
+      let userNic = await User.findOne({ nic });
+      if (userNic) {
+        return res.status(400).json({ msg: 'NIC already exists' });
+      }
+    }
+
+    // Update user fields
+    user.name = name || user.name;
+    user.email = email || user.email;
+    user.phone = phone || user.phone;
+    user.address = address || user.address;
+    user.nic = nic || user.nic;
+    user.profile = profile || user.profile;
+
+    // Hash password if it's being updated
+    if (password) {
+      const salt = await bcrypt.genSalt(10);
+      user.password = await bcrypt.hash(password, salt);
+    }
+
+    // Save the updated user
+    await user.save();
+
+    res.json({ msg: 'User updated successfully', user });
   } catch (err) {
     console.error(err.message);
     res.status(500).send('Server error');
