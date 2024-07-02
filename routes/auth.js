@@ -146,7 +146,7 @@ router.put('/update', auth, async (req, res) => {
 
   try {
     // Find the user by ID
-    let user = await User.find(email);
+    let user = await User.findOne(email);
 
     if (!user) {
       return res.status(404).json({ msg: 'User not found' });
