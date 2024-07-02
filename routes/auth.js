@@ -192,9 +192,9 @@ router.put('/update', auth, async (req, res) => {
 });
 
 router.delete('/delete', auth, async (req, res) => {
-  const { id } = req.body;
   try {
-    await User.findByIdAndDelete(id);
+    // Use req.user.id to delete the authenticated user's account
+    await User.findByIdAndDelete(req.user.id);
     res.json({ msg: 'User deleted' });
   } catch (err) {
     console.error(err.message);
