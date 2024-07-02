@@ -191,6 +191,17 @@ router.put('/update', auth, async (req, res) => {
   }
 });
 
+router.delete('/delete', auth, async (req, res) => {
+  const { id } = req.body;
+  try {
+    await User.findByIdAndDelete(id);
+    res.json({ msg: 'User deleted' });
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).send('Server error');
+  }
+});
+
 module.exports = router;
 
 
