@@ -44,6 +44,10 @@ const TripSchema = new Schema({
         type: Number,
         required: true,
     },
+    loguser: {
+        type: String,
+        required: true,
+      },
 
 });
 
