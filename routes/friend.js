@@ -1,9 +1,10 @@
 const router = require("express").Router();
 const Friend = require("../models/freinds");
 const userSchema = require("../models/user");
+const auth = require("../middleware/auth");
 
 // Add friend request
-router.post("/addFriend", async (req, res) => {
+router.post("/addFriend",auth, async (req, res) => {
   const { from, to } = req.body;
 
   try {
@@ -30,7 +31,7 @@ router.post("/addFriend", async (req, res) => {
 });
 
 // confirm friend request
-router.put("/updateReq/:id", async (req, res) => {
+router.put("/updateReq/:id",auth, async (req, res) => {
   const { id } = req.params;
   const { status } = req.query;
   // status 1 = accept, status 2 = reject
@@ -61,7 +62,7 @@ router.put("/updateReq/:id", async (req, res) => {
 });
 
 // get all friends
-router.get("/allFriends/:id", async (req, res) => {
+router.get("/allFriends/:id",auth, async (req, res) => {
   const { id } = req.params;
   try {
     const friends = await Friend.find({
@@ -76,7 +77,7 @@ router.get("/allFriends/:id", async (req, res) => {
 });
 
 // get all pending friend requests
-router.get("/allReq/:id", async (req, res) => {
+router.get("/allReq/:id",auth, async (req, res) => {
   const { id } = req.params;
   try {
     const requests = await Friend.find({
@@ -91,7 +92,7 @@ router.get("/allReq/:id", async (req, res) => {
 });
 
 // remove friend request
-router.delete("/removeReq/:id", async (req, res) => {
+router.delete("/removeReq/:id",auth, async (req, res) => {
   const { id } = req.params;
 
   try {
@@ -111,7 +112,7 @@ router.delete("/removeReq/:id", async (req, res) => {
 });
 
 // remove friend
-router.delete("/removeFriend/:id", async (req, res) => {
+router.delete("/removeFriend/:id",auth, async (req, res) => {
   const { id } = req.params;
 
   try {
@@ -134,7 +135,7 @@ router.delete("/removeFriend/:id", async (req, res) => {
 });
 
 // Friend Suggestion
-router.get("/suggestion/:id", async (req, res) => {
+router.get("/suggestion/:id",auth, async (req, res) => {
   const { id } = req.params;
 
   try {
