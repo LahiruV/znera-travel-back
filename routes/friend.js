@@ -7,60 +7,51 @@ router.post("/addFriend", async (req, res) => {
   const { from, to } = req.body;
 
   try {
+    const friendRequestExists = await Friend.exists({ from, to });
+
+    if (friendRequestExists) {
+      return res.status(400).json({ message: "Friend request already exists" });
+    }
+
     const newFriend = new Friend({
       from,
       to,
     });
 
-    const friendRequest = await Friend.find({
-      from,
-      to,
-    });
-
-    if (friendRequest.length > 0) {
-      return res.status(400).json({ message: "Friend request already exists" });
-    }
-
     await newFriend.save();
-
     res.json({ message: "Friend request sent" });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
 });
 
-// confirm friend request
+// Confirm friend request
 router.put("/updateReq/:id", async (req, res) => {
   const { id } = req.params;
-  const { status } = req.query;
-  // status 1 = accept, status 2 = reject
+  const { status } = req.query; // status 1 = accept, status 2 = reject
 
   try {
-    const isReqExist = await Friend.findById(id);
+    const friendRequest = await Friend.findById(id);
 
-    // check if friend request exists
-    if (!isReqExist) {
+    if (!friendRequest) {
       return res.status(400).json({ message: "Friend request does not exist" });
     }
-    let message = "";
-    // check if status is valid
+
     if (status === "1") {
       await Friend.findByIdAndUpdate(id, { status: "accepted" });
-      message = "Friend request accepted";
+      return res.json({ message: "Friend request accepted" });
     } else if (status === "2") {
       await Friend.findByIdAndDelete(id);
-      message = "Friend request rejected";
+      return res.json({ message: "Friend request rejected" });
     } else {
       return res.status(400).json({ message: "Invalid status" });
     }
-
-    res.json({ message });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
 });
 
-// get all friends
+// Get all friends
 router.get("/allFriends/:id", async (req, res) => {
   const { id } = req.params;
   try {
@@ -69,13 +60,13 @@ router.get("/allFriends/:id", async (req, res) => {
       status: "accepted",
     }).populate("from to");
 
-    res.json({ friends });
+    res.json(friends);
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
 });
 
-// get all pending friend requests
+// Get all pending friend requests
 router.get("/allReq/:id", async (req, res) => {
   const { id } = req.params;
   try {
@@ -84,48 +75,45 @@ router.get("/allReq/:id", async (req, res) => {
       status: "pending",
     }).populate("from to");
 
-    res.json({ requests });
+    res.json(requests);
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
 });
 
-// remove friend request
+// Remove friend request
 router.delete("/removeReq/:id", async (req, res) => {
   const { id } = req.params;
 
   try {
-    const isReqExist = await Friend.findById(id);
+    const friendRequest = await Friend.findById(id);
 
-    // check if friend request exists
-    if (!isReqExist) {
+    if (!friendRequest) {
       return res.status(400).json({ message: "Friend request does not exist" });
     }
 
     await Friend.findByIdAndDelete(id);
-
     res.json({ message: "Friend request removed" });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
 });
 
-// remove friend
-router.delete("/removeFriend/:id", async (req, res) => {
-  const { id } = req.params;
+// Remove friend
+router.delete("/removeFriend/:userId/:friendId", async (req, res) => {
+  const { userId, friendId } = req.params;
 
   try {
-    const isFriendExist = await Friend.find({
-      $or: [{ from: id }, { to: id }],
-      status: "accepted",
+    const friend = await Friend.findOneAndDelete({
+      $or: [
+        { from: userId, to: friendId, status: "accepted" },
+        { from: friendId, to: userId, status: "accepted" },
+      ],
     });
 
-    // check if friend exists
-    if (!isFriendExist) {
+    if (!friend) {
       return res.status(400).json({ message: "Friend does not exist" });
     }
-
-    await Friend.findByIdAndDelete(id);
 
     res.json({ message: "Friend removed" });
   } catch (error) {
@@ -133,41 +121,29 @@ router.delete("/removeFriend/:id", async (req, res) => {
   }
 });
 
-// Friend Suggestion
+// Friend suggestion
 router.get("/suggestion/:id", async (req, res) => {
   const { id } = req.params;
 
   try {
-    // get all users expect the current user
     const users = await userSchema.find({ _id: { $ne: id } });
-    // get all friends request  of the current user
     const friends = await Friend.find({
       $or: [{ from: id }, { to: id }],
     }).populate("from to");
 
-    let friendList = [];
-
-    users.forEach((user) => {
-      // check if the user is already a friend
-      const isFriend = friends.find((friend) => {
-        return (
+    const suggestions = users.filter((user) => {
+      const isFriend = friends.some(
+        (friend) =>
           (friend.from._id.toString() === id &&
             friend.to._id.toString() === user._id.toString()) ||
           (friend.from._id.toString() === user._id.toString() &&
             friend.to._id.toString() === id)
-        );
-      });
+      );
 
-      if (!isFriend) {
-        friendList.push({ user });
-      } else {
-        if (isFriend.status === "pending") {
-          friendList.push({ user, isFriend });
-        }
-      }
+      return !isFriend;
     });
 
-    res.json({ friendList });
+    res.json(suggestions);
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
