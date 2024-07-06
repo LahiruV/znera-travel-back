@@ -6,6 +6,7 @@ const cors = require('cors');
 const authRoutes = require('./routes/auth');
 const friend = require('./routes/friend');
 const trip = require('./routes/trip');
+const chat = require('./routes/chat');
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -18,6 +19,7 @@ app.use(cors()); // Add this line to enable CORS
 app.use('/api/auth', authRoutes);
 app.use('/api/friend', friend);
 app.use('/api/trip', trip);
+app.use('/api/chat', chat);
 
 // MongoDB connection
 mongoose.connect(process.env.MONGO_URI, { useNewUrlParser: true, useUnifiedTopology: true })
