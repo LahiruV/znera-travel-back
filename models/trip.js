@@ -21,8 +21,7 @@ const TripSchema = new Schema({
     },
     season: {
         type: String,
-        default: "",
-        required: true,
+        default: "",        
     },
     accommodation: {
         type: String,

@@ -55,5 +55,38 @@ router.delete("/trips/:id", auth, async (req, res) => {
     }
 });
 
+router.put("/trips/:id", auth, async (req, res) => {
+    const tripId = req.params.id;
+    const { name, location, noOfDays, noOfPersons, season, accommodation, transport, foodPackage, totalCost, totalCostPerPerson, loguser } = req.body;
+
+    try {
+        const updatedTrip = await Trip.findByIdAndUpdate(
+            tripId,
+            {
+                name,
+                location,
+                noOfDays,
+                noOfPersons,
+                season,
+                accommodation,
+                transport,
+                foodPackage,
+                totalCost,
+                totalCostPerPerson,
+                loguser
+            },
+            { new: true, runValidators: true }
+        );
+
+        if (!updatedTrip) {
+            return res.status(404).json({ message: "Trip not found" });
+        }
+
+        res.json({ message: "Trip updated successfully", trip: updatedTrip });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
 
 module.exports = router;
